@@ -1,5 +1,6 @@
 package com.baiquan.food.controller;
 
+import com.baiquan.food.dao.BaiduService;
 import com.baiquan.food.dao.FoodService;
 import com.baiquan.food.model.Food;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,6 +23,8 @@ public class FoodController {
 
     @Autowired
     FoodService foodService;
+    @Autowired
+    BaiduService baiduService;
 
 
     @GetMapping("/getIndexItem")
@@ -36,8 +39,14 @@ public class FoodController {
     }
 
     @GetMapping("/getFood")
-    public String getFood(String id){
+    public String getFood(String id) throws Exception{
         return foodService.getFood(id);
+    }
+
+
+    @GetMapping("/getMusicUrl")
+    public String getMusicUrl(String id,String txt){
+        return baiduService.getMusicUrl(id,txt);
     }
 
 }

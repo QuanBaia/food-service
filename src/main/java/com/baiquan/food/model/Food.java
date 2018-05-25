@@ -31,5 +31,7 @@ public class Food extends Base{
 
     private Integer index;
 
+    private String readNum;
+
 
 }

@@ -4,6 +4,7 @@ import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.baiquan.food.model.Food;
 import com.baiquan.food.util.EncodeUtils;
+import com.baiquan.food.util.HttpUtils;
 import com.baiquan.food.util.RandomUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -48,17 +49,23 @@ public class FoodService {
 
     public List<Food> getListFood(String search){
 
+
         Query query = new Query(
                 Criteria.where("name").regex(".*?\\"+search+".*")
                         .and("info").regex(".*?\\"+search+".*")
         );
+        if (search.equals("茶")){
+            query = new Query(
+                    Criteria.where("name").regex("^.*[\\茶]+$")
+            );
+        }
 
         return mongoTemplate.find(query,Food.class);
 
     }
 
 
-    public String getFood(String id){
+    public String getFood(String id) throws Exception{
         Query query = new Query(
                 Criteria.where("id").is(id)
         );
@@ -68,25 +75,58 @@ public class FoodService {
 
         JSONArray imgs = new JSONArray();
         JSONObject jsonObject = restTemplate.getForObject(url,JSONObject.class);
-        JSONArray jsonArray = jsonObject.getJSONArray("data");
-        for (int i = 0;i< jsonArray.size();i++){
+        if (jsonObject != null){
+            JSONArray jsonArray = jsonObject.getJSONArray("data");
+            for (int i = 0;i< jsonArray.size();i++){
 
-            JSONObject info = jsonArray.getJSONObject(i);
-            String formUrl = info.getString("objURL");
-            if (StringUtils.isNotBlank(formUrl)){
-               imgs.add( EncodeUtils.baiDuImgUrl(formUrl));
-               if (imgs.size() == 10){
-                   break;
-               }
+                JSONObject info = jsonArray.getJSONObject(i);
+                String formUrl = info.getString("objURL");
+                if (StringUtils.isNotBlank(formUrl)){
+
+                    String ss = HttpUtils.isImagesTrue(EncodeUtils.baiDuImgUrl(formUrl));
+                    if (ss.equals("200")){
+                        imgs.add( EncodeUtils.baiDuImgUrl(formUrl));
+                    }
+
+                    if (imgs.size() == 6){
+                        break;
+                    }
+                }
             }
         }
 
-        JSONObject result = JSONObject.parseObject(JSONObject.toJSONString(food));
+        JSONObject result = new JSONObject();
+
+        result.put("name",food.getName());
+        result.put("id",food.getId());
+        if (food.getInfo().contains("；")){
+            result.put("info",food.getInfo().split("；"));
+        }else if (food.getInfo().contains("。")){
+            result.put("info",food.getInfo().split("。"));
+        }else {
+            result.put("info",food.getInfo().split(" "));
+        }
+
+
+        if (food.getMaterial().contains("1") && food.getMaterial().contains("2")){
+            result.put("material",food.getMaterial().split(" "));
+        }else {
+            result.put("material",food.getMaterial().split("，"));
+        }
+
+        result.put("interrelates",food.getInterrelates());
+        result.put("introduction",food.getIntroduction().split("，"));
+
+        result.put("number",food.getReadNum());
+        result.put("index",food.getIndex());
+
+
+
         result.put("imgs",imgs);
 
 
 
-        return "";
+        return result.toJSONString();
     }
 
 }
