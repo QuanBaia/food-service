@@ -30,6 +30,8 @@ public class FoodService {
 
     @Autowired
     RestTemplate restTemplate;
+    @Autowired
+    HttpUtils httpUtils;
 
 
 
@@ -59,6 +61,14 @@ public class FoodService {
                     Criteria.where("name").regex("^.*[\\茶]+$")
             );
         }
+        if (search.equals("甜品")){
+
+            query = new Query(Criteria.where("name").regex(".*?\\蛋糕.*"));
+
+        }if (search.equals("主食")){
+            query = new Query(Criteria.where("name").regex(".*?\\饭.*"));
+
+        }
 
         return mongoTemplate.find(query,Food.class);
 
@@ -83,7 +93,7 @@ public class FoodService {
                 String formUrl = info.getString("objURL");
                 if (StringUtils.isNotBlank(formUrl)){
 
-                    String ss = HttpUtils.isImagesTrue(EncodeUtils.baiDuImgUrl(formUrl));
+                    String ss = httpUtils.isImagesTrue(EncodeUtils.baiDuImgUrl(formUrl));
                     if (ss.equals("200")){
                         imgs.add( EncodeUtils.baiDuImgUrl(formUrl));
                     }
@@ -108,9 +118,14 @@ public class FoodService {
         }
 
 
-        if (food.getMaterial().contains("1") && food.getMaterial().contains("2")){
+        if (food.getMaterial().contains("1") && food.getMaterial().contains("2")  && food.getMaterial().contains("、")){
+            result.put("material",food.getMaterial().split("；"));
+        }else if (food.getMaterial().contains("1") && food.getMaterial().contains("2")  && !food.getMaterial().contains("；")){
             result.put("material",food.getMaterial().split(" "));
-        }else {
+        }else if (food.getMaterial().contains("1") && food.getMaterial().contains("2")  && food.getMaterial().contains("。")){
+            result.put("material",food.getMaterial().split("。"));
+        }
+        else {
             result.put("material",food.getMaterial().split("，"));
         }
 

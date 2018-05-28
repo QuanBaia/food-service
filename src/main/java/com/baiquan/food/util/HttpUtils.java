@@ -1,40 +1,37 @@
 package com.baiquan.food.util;
 
-import java.io.IOException;
-import java.net.HttpURLConnection;
-import java.net.URL;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestTemplate;
 
 /**
  * @author : QuanBai
  * @Date : Created in 2018/5/25 14:13
  */
 
+@Service
 public class HttpUtils {
-    public static String isImagesTrue(String posturl) {
-        String code = "400";
+
+
+    @Autowired
+    private RestTemplate restTemplate;
+
+
+    public String isImagesTrue(String posturl) throws Exception {
+        System.out.println("获取图片");
+        String code = "404";
         try {
-            URL url = new URL(posturl);
-            HttpURLConnection urlcon = (HttpURLConnection) url.openConnection();
-            urlcon.setRequestMethod("GET");
-            urlcon.setRequestProperty("Content-type",
-                    "application/x-www-form-urlencoded");
-            if (urlcon.getResponseCode() == HttpURLConnection.HTTP_OK) {
-                System.out.println(HttpURLConnection.HTTP_OK + posturl
-                        + ":posted ok! ----------------图片获取成功");
-                code = "200";
-            } else {
-                System.out.println(urlcon.getResponseCode() + posturl
-                        + ":Bad post...----------------图片获取失败");
-                code= "400";
-            }
-        } catch (Exception ex){
-            System.out.println("error-------"+posturl
-                    + ":Bad post...----------------图片获取失败");
-            code="400";
-
-        } finally {
-
-            return  code;
+            ResponseEntity result = restTemplate.getForEntity(posturl,String.class);
+            code = result.getStatusCode().toString();
+        }catch (Exception e){
+            return "404";
         }
+        System.out.println("--------------------------"+code);
+
+
+
+
+        return code;
     }
 }

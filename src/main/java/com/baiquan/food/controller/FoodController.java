@@ -4,9 +4,6 @@ import com.baiquan.food.dao.BaiduService;
 import com.baiquan.food.dao.FoodService;
 import com.baiquan.food.model.Food;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.mongodb.core.MongoTemplate;
-import org.springframework.data.mongodb.core.query.Criteria;
-import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -47,6 +44,7 @@ public class FoodController {
     @GetMapping("/getMusicUrl")
     public String getMusicUrl(String id,String txt){
         return baiduService.getMusicUrl(id,txt);
+
     }
 
 }
